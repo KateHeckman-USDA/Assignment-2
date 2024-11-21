@@ -1,0 +1,70 @@
+---
+title: "USDA Data Science Training Program  \nIntermediate Assignment 2: Cleaning Data"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Data:** 
+- USDA Food Sales Dataset (Edited): [StateAndCategoryfoodsales_Edited.xlsx](https://usdagcc.sharepoint.com/:x:/r/sites/FNS-DataScienceTrainingProgram/Shared Documents/FY24-25 Intermediate/Assignments/Intermediate Assignment 2 - Cleaning Data/StateAndCategoryfoodsales_Edited.xlsx?d=wd15960a3e5a74454a0c4600553a7f3c7&csf=1&web=1&e=Opo0GX) on Teams
+- For bonus only: Census Population Estimates: Query Census API following Assignment 1
+
+
+
+**DataCamp:** The following DataCamp courses correspond to this exercise:
+
+- R: Data Manipulation with dplyr, Cleaning Data in R, Working with Dates and Times in R
+- Python: Data Manipulation with Pandas, Working with Dates and Times, Cleaning Data in Python
+
+
+**Assignment:**
+
+1.	Save the USDA Food Sales Dataset to your computer and import the data into a dataframe.
+```{r}
+# install.packages("readxl")
+library("readxl")
+library("tidyverse")
+setwd("C:\\Users\\kaheckman\\OneDrive - USDA\\Documents\\GitHub\\Assignment-2")
+# Read in the second sheet with the data and skip the first line which is a label
+df <- read_excel("StateAndCategoryfoodsales_Edited.xlsx", sheet = 2, skip = 1)
+```
+2.	Look for extraneous rows at the start and end of the USDA Food Sales Dataset. Remove these rows from your dataframe.
+```{r}
+# Looking for extraneous rows
+head(df)
+tail(df)
+# Removing bottom four rows
+df <- df[-c(60546:60549),]
+```
+
+3.	Print the datatypes of your columns. Are there any numerical fields that may need to be converted to a more appropriate datatype?
+```{r}
+str(df)
+# I don't see any numerical variables that need modified, but the 'Dollars' data should be converted from 'chr' to 'num'
+# There are several numerical columns that need covered from 'chr'
+df <- df %>% mutate(Dollars = as.numeric(gsub("$", "", Dollars)))
+          # mutate('Dollars 2 years ago' = as.numeric('Dollars 2 years ago')) %>% 
+          # mutate('Volume sales 2 years ago' = as.numeric('Volume sales 2 years ago')) %>% 
+          # mutate('Unit sales 2 years ago' = as.numeric('Unit sales 2 years ago')) %>% 
+          # mutate('Percent change dollars 2 years' = as.numeric('Percent change dollars 2 years')) %>% 
+          # mutate('Percent change units 2 years' = as.numeric('Percent change units 2 years')) %>% 
+          # mutate('Percent change volume 2 years' = as.numeric('Percent change volume 2 years')))
+
+```
+
+
+4.	A bug in the entry system was found that made it possible for duplicate entries to happen for a short time. Check the dataset for true duplicates and drop these.
+5.	Some variables were coded wrong due to entry error. Print the unique values of your categorical variables and their counts to find these errors. Remap them to the correct category.
+6.	Are there any missing values in the numeric fields? How would you handle these?
+7.	Convert the “Date” column to the datetime datatype. Are there any dates that may have been entered incorrectly? Drop these rows if found.
+8.	Using “Dollars,” Calculate the total dollars spent on alcohol in Alabama in year 2020.
+
+
+**Bonus:** Follow the process you used in Assignment 1 to import the Census Population data to a dataframe. Using both datasets, which state spent the most on vegetables per capita in 2020? 
+
+**Deliverables:**
+
+-   Your code (the .R, .Rmd, .py, or .ipynb file)
+-   These deliverables will be submitted through GitHub by the end of the program.
