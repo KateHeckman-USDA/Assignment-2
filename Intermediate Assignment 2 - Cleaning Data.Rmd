@@ -43,7 +43,7 @@ df <- df[-c(60546:60549),]
 ```{r}
 str(df)
 # I don't see any numerical variables that need modified, but the 'Dollars' data should be converted from 'chr' to 'num'
-# There are several numerical columns that need covered from 'chr'
+# There are several numerical columns that need converted from 'chr' to 'num'
 df <- df %>% mutate(Dollars = as.numeric(gsub("\\$", "", Dollars))) %>% 
           mutate('Dollars 2 years ago' = as.numeric(gsub("NA", "", df$'Dollars 2 years ago'))) %>%
   mutate('Volume sales 2 years ago' = as.numeric(gsub("NA", "", df$'Volume sales 2 years ago'))) %>%
@@ -90,7 +90,7 @@ df$Category <- gsub("Alchohol|Alcohols|Booze|Moonshine|alcohol|alchohol", "Alcoh
 6.	Are there any missing values in the numeric fields? How would you handle these?
 ```{r}
 # Yes, the data associated with 2 years ago has many missing values
-# I cast the missing values to "NA" when coverting the column to numeric
+# I cast the missing values to "NA" when converting the column to numeric
 ```
 
 7.	Convert the “Date” column to the datetime datatype. Are there any dates that may have been entered incorrectly? Drop these rows if found.
