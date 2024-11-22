@@ -44,22 +44,78 @@ df <- df[-c(60546:60549),]
 str(df)
 # I don't see any numerical variables that need modified, but the 'Dollars' data should be converted from 'chr' to 'num'
 # There are several numerical columns that need covered from 'chr'
-df <- df %>% mutate(Dollars = as.numeric(gsub("$", "", Dollars)))
-          # mutate('Dollars 2 years ago' = as.numeric('Dollars 2 years ago')) %>% 
-          # mutate('Volume sales 2 years ago' = as.numeric('Volume sales 2 years ago')) %>% 
-          # mutate('Unit sales 2 years ago' = as.numeric('Unit sales 2 years ago')) %>% 
-          # mutate('Percent change dollars 2 years' = as.numeric('Percent change dollars 2 years')) %>% 
-          # mutate('Percent change units 2 years' = as.numeric('Percent change units 2 years')) %>% 
-          # mutate('Percent change volume 2 years' = as.numeric('Percent change volume 2 years')))
+df <- df %>% mutate(Dollars = as.numeric(gsub("\\$", "", Dollars))) %>% 
+          mutate('Dollars 2 years ago' = as.numeric(gsub("NA", "", df$'Dollars 2 years ago'))) %>%
+  mutate('Volume sales 2 years ago' = as.numeric(gsub("NA", "", df$'Volume sales 2 years ago'))) %>%
+  mutate('Unit sales 2 years ago' = as.numeric(gsub("NA", "", df$'Unit sales 2 years ago'))) %>%
+  mutate('Percent change dollars 2 years' = as.numeric(gsub("NA", "", df$'Percent change dollars 2 years'))) %>%
+  mutate('Percent change units 2 years' = as.numeric(gsub("NA", "", df$'Percent change units 2 years'))) %>%
+  mutate('Percent change volume 2 years' = as.numeric(gsub("NA", "", df$'Percent change volume 2 years')))
 
 ```
 
 
 4.	A bug in the entry system was found that made it possible for duplicate entries to happen for a short time. Check the dataset for true duplicates and drop these.
+```{r}
+df[!duplicated(df), ]
+```
+
 5.	Some variables were coded wrong due to entry error. Print the unique values of your categorical variables and their counts to find these errors. Remap them to the correct category.
+```{r}
+# Print unique values of categorical variables 'State' and 'Category'
+dfState <- df %>% group_by(State) %>% summarize(StateValues = n()) %>% arrange(State)
+dfCategory <- df %>% group_by(Category) %>% summarize(CatValues = n()) %>% arrange(Category)
+print(dfState)
+print(dfCategory)
+
+# Remap variables to correct values
+df$State <- gsub("AL|Bama", "Alabama",
+            gsub("Arizonia|AZ", "Arizona",
+            gsub("Arkanss", "Arkansas",
+            gsub("CAlabamaifornia", "California",
+            gsub("Colrado", "Colorado",
+            gsub("Floride", "Florida",
+            gsub("IOWA", "Iowa",
+            gsub("Illlnois", "Illinois",
+            gsub("TX|Tex|Texasas", "Texas",
+                 df$State)))))))))
+
+df$Category <- gsub("Alchohol|Alcohols|Booze|Moonshine|alcohol|alchohol", "Alcohol",
+                    gsub ("Froots", "Fruits",
+                    gsub ("Milk|dairy|lactose|milk", "Dairy",
+                    gsub("Vargetable|Vegetanles|Vegies", "Vegetables",
+                         df$Category))))
+```
+
 6.	Are there any missing values in the numeric fields? How would you handle these?
+```{r}
+# Yes, the data associated with 2 years ago has many missing values
+# I cast the missing values to "NA" when coverting the column to numeric
+```
+
 7.	Convert the “Date” column to the datetime datatype. Are there any dates that may have been entered incorrectly? Drop these rows if found.
+```{r}
+# install.packages("datetime")
+library(datetime)
+
+# There are no time values, so using 'as.Date()' instead of 'as.datetime()'
+df$Date <- as.Date(df$Date)
+
+# Looking for incorrectly entered dates
+print(unique(df$Date))
+
+# Dropping "NA" rows
+df <- drop_na(df, Date)
+```
+
 8.	Using “Dollars,” Calculate the total dollars spent on alcohol in Alabama in year 2020.
+```{r}
+df$Year <- format(as.Date(df$Date, format="%Y/%m/%d"), "%Y")
+alcoholSpending <- df %>% group_by(State, Year) %>% summarize(yearlySpending = sum(Dollars))
+AL2020 <- filter(alcoholSpending, State == "Alabama" & Year == 2020)
+AL2020value <- AL2020$yearlySpending
+print(paste0("Alabama spent $", AL2020value, " on alcohol in the year 2020"))
+```
 
 
 **Bonus:** Follow the process you used in Assignment 1 to import the Census Population data to a dataframe. Using both datasets, which state spent the most on vegetables per capita in 2020? 
