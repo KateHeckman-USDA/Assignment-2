@@ -29,6 +29,7 @@ library("tidyverse")
 setwd("C:\\Users\\kaheckman\\OneDrive - USDA\\Documents\\GitHub\\Assignment-2")
 # Read in the second sheet with the data and skip the first line which is a label
 df <- read_excel("StateAndCategoryfoodsales_Edited.xlsx", sheet = 2, skip = 1)
+head(df, n=20)
 ```
 2.	Look for extraneous rows at the start and end of the USDA Food Sales Dataset. Remove these rows from your dataframe.
 ```{r}
@@ -37,6 +38,7 @@ head(df)
 tail(df)
 # Removing bottom four rows
 df <- df[-c(60546:60549),]
+tail(df)
 ```
 
 3.	Print the datatypes of your columns. Are there any numerical fields that may need to be converted to a more appropriate datatype?
@@ -51,13 +53,14 @@ df <- df %>% mutate(Dollars = as.numeric(gsub("\\$", "", Dollars))) %>%
   mutate('Percent change dollars 2 years' = as.numeric(gsub("NA", "", df$'Percent change dollars 2 years'))) %>%
   mutate('Percent change units 2 years' = as.numeric(gsub("NA", "", df$'Percent change units 2 years'))) %>%
   mutate('Percent change volume 2 years' = as.numeric(gsub("NA", "", df$'Percent change volume 2 years')))
-
+head(df, n=20)
 ```
 
 
 4.	A bug in the entry system was found that made it possible for duplicate entries to happen for a short time. Check the dataset for true duplicates and drop these.
 ```{r}
-df[!duplicated(df), ]
+df <- df[!duplicated(df), ]
+head(df, n=20)
 ```
 
 5.	Some variables were coded wrong due to entry error. Print the unique values of your categorical variables and their counts to find these errors. Remap them to the correct category.
@@ -85,6 +88,7 @@ df$Category <- gsub("Alchohol|Alcohols|Booze|Moonshine|alcohol|alchohol", "Alcoh
                     gsub ("Milk|dairy|lactose|milk", "Dairy",
                     gsub("Vargetable|Vegetanles|Vegies", "Vegetables",
                          df$Category))))
+head(df)
 ```
 
 6.	Are there any missing values in the numeric fields? How would you handle these?
@@ -111,8 +115,8 @@ df <- drop_na(df, Date)
 8.	Using “Dollars,” Calculate the total dollars spent on alcohol in Alabama in year 2020.
 ```{r}
 df$Year <- format(as.Date(df$Date, format="%Y/%m/%d"), "%Y")
-alcoholSpending <- df %>% group_by(State, Year) %>% summarize(yearlySpending = sum(Dollars))
-AL2020 <- filter(alcoholSpending, State == "Alabama" & Year == 2020)
+Spending <- df %>% group_by(State, Year, Category) %>% summarize(yearlySpending = sum(Dollars))
+AL2020 <- filter(Spending, State == "Alabama" & Year == 2020 & Category == "Alcohol")
 AL2020value <- AL2020$yearlySpending
 print(paste0("Alabama spent $", AL2020value, " on alcohol in the year 2020"))
 ```
